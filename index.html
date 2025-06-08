@@ -1,63 +1,363 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>WARFORGE+</title>
-  <style>
-    body {
-      background-color: #0e0e0e;
-      color: #f5f5f5;
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
-    input, button {
-      margin: 10px;
-      padding: 10px;
-      font-size: 16px;
-    }
-    .result {
-      margin-top: 30px;
-      text-align: left;
-      max-width: 600px;
-      margin-left: auto;
-      margin-right: auto;
-      background: #1a1a1a;
-      padding: 20px;
-      border-radius: 8px;
-    }
-  </style>
-</head>
-<body>
-  <h1>WARFORGE+ PDF Evaluator</h1>
-  <input type="file" id="pdfInput" />
-  <button onclick="uploadPDF()">Evaluate</button>
-  <div class="result" id="result"></div>
+import React, { useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Icons } from '@/components/icons';
 
-  <script>
-    async function uploadPDF() {
-      const fileInput = document.getElementById('pdfInput');
-      const resultDiv = document.getElementById('result');
-      if (!fileInput.files.length) {
-        alert("Please select a PDF file.");
-        return;
-      }
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
+export default function WARFORGEUI() {
+  const [file, setFile] = useState<File | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState(0);
+  const [simulationPersona, setSimulationPersona] = useState('Contracting Officer');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-      resultDiv.innerText = "🔍 Evaluating...";
-
-      try {
-        const response = await fetch("/evaluate", {
-          method: "POST",
-          body: formData
-        });
-        const data = await response.json();
-        resultDiv.innerText = JSON.stringify(data, null, 2);
-      } catch (err) {
-        resultDiv.innerText = "❌ Error: " + err.message;
-      }
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile?.type === 'application/pdf') {
+      setFile(droppedFile);
     }
-  </script>
-</body>
-</html>
+  };
+
+  const simulateAnalysis = () => {
+    setIsAnalyzing(true);
+    setAnalysisProgress(0);
+    
+    const interval = setInterval(() => {
+      setAnalysisProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setIsAnalyzing(false);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+  };
+
+  const complianceStatus = [
+    { id: 'far-52.219-14', status: 'compliant', text: 'FAR 52.219-14 compliant' },
+    { id: 'past-performance', status: 'non-compliant', text: 'Missing past performance volume' },
+    { id: 'page-limit', status: 'warning', text: 'Technical approach exceeds page limit' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-gray-100 p-6 space-y-8">
+      {/* Secure Header with Session Status */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between border-b border-gray-800 pb-4 gap-4">
+        <div className="flex items-center space-x-4">
+          <img 
+            src="/warforge-logo-secure.png" 
+            alt="WARFORGE Tactical Logo" 
+            className="h-10 w-10 object-contain"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = '/default-secure-logo.png';
+            }}
+          />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
+              WARFORGE TACTICAL
+            </h1>
+            <div className="flex items-center space-x-2 text-xs text-gray-400">
+              <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+              <span>Secure Session Active | NIST SP 800-171 Compliant</span>
+            </div>
+          </div>
+        </div>
+
+        <nav className="flex flex-wrap justify-center gap-2">
+          <Button variant="ghost" className="hover:bg-gray-800 hover:text-orange-400">
+            <Icons.dashboard className="mr-2 h-4 w-4" /> Dashboard
+          </Button>
+          <Button variant="ghost" className="hover:bg-gray-800 hover:text-orange-400">
+            <Icons.upload className="mr-2 h-4 w-4" /> Upload
+          </Button>
+          <Button variant="ghost" className="hover:bg-gray-800 hover:text-orange-400">
+            <Icons.report className="mr-2 h-4 w-4" /> Reports
+          </Button>
+          <Button variant="ghost" className="hover:bg-gray-800 hover:text-orange-400" disabled>
+            <Icons.admin className="mr-2 h-4 w-4" /> Admin
+          </Button>
+          <Button variant="outline" className="border-red-500 text-red-500 hover:bg-red-900/20">
+            <Icons.logout className="mr-2 h-4 w-4" /> Secure Logout
+          </Button>
+        </nav>
+      </header>
+
+      {/* Main Analysis Grid */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upload Card */}
+        <Card className="border border-gray-800 bg-gray-900/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center">
+                <Icons.file className="mr-2 h-5 w-5 text-orange-400" />
+                Contract Analysis
+              </h2>
+              <Badge variant="outline" className="border-orange-400 text-orange-400">
+                DFARS 252.204-7012
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div 
+              className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                file ? 'border-orange-400 bg-orange-400/10' : 'border-gray-700 hover:border-gray-600'
+              }`}
+              onDrop={handleFileDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                className="hidden"
+                accept=".pdf"
+                onChange={(e) => e.target.files?.[0] && setFile(e.target.files[0])}
+              />
+              
+              {file ? (
+                <div className="space-y-2">
+                  <Icons.file className="mx-auto h-10 w-10 text-orange-400" />
+                  <p className="font-medium">{file.name}</p>
+                  <p className="text-sm text-gray-400">
+                    {(file.size / 1024 / 1024).toFixed(2)} MB
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <Icons.uploadCloud className="mx-auto h-10 w-10 text-gray-400" />
+                  <p className="mt-2">Drag & drop solicitation PDF</p>
+                  <p className="text-sm text-gray-500">or click to browse</p>
+                </>
+              )}
+            </div>
+
+            <Button 
+              className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+              disabled={!file || isAnalyzing}
+              onClick={simulateAnalysis}
+            >
+              {isAnalyzing ? (
+                <span className="flex items-center">
+                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                  Analyzing...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <Icons.search className="mr-2 h-4 w-4" />
+                  Analyze Document
+                </span>
+              )}
+            </Button>
+
+            {isAnalyzing && (
+              <Progress 
+                value={analysisProgress} 
+                className="mt-4 h-2 bg-gray-800" 
+                indicatorClassName="bg-orange-500"
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Simulation Card */}
+        <Card className="border border-gray-800 bg-gray-900/50">
+          <CardHeader className="pb-3">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Icons.brain className="mr-2 h-5 w-5 text-purple-400" />
+              Evaluator Simulation
+            </h2>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-1">
+                Select reviewer persona
+              </label>
+              <select
+                className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+                value={simulationPersona}
+                onChange={(e) => setSimulationPersona(e.target.value)}
+              >
+                <option value="Contracting Officer">Contracting Officer</option>
+                <option value="Technical Reviewer">Technical Reviewer</option>
+                <option value="Budget Analyst">Budget Analyst</option>
+                <option value="Source Selection">Source Selection Authority</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Simulated Score</span>
+                <span className="font-medium">88/100 (LPTA)</span>
+              </div>
+              <Progress value={88} className="h-2 bg-gray-800" indicatorClassName="bg-green-500" />
+            </div>
+
+            <Alert className="border-blue-500 bg-blue-500/10">
+              <Icons.info className="h-4 w-4 text-blue-400" />
+              <AlertTitle>Simulation Note</AlertTitle>
+              <AlertDescription className="text-blue-300">
+                Scores adjust based on selected persona and historical award data
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+
+        {/* Compliance Card - Full Width */}
+        <Card className="lg:col-span-2 border border-gray-800 bg-gray-900/50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold flex items-center">
+                <Icons.shield className="mr-2 h-5 w-5 text-blue-400" />
+                Compliance & Risk Assessment
+              </h2>
+              <Badge variant="outline" className="border-green-400 text-green-400">
+                {complianceStatus.filter(i => i.status === 'compliant').length}/{complianceStatus.length} Passed
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {complianceStatus.map((item) => (
+                <div 
+                  key={item.id}
+                  className={`p-3 rounded-md border ${
+                    item.status === 'compliant' 
+                      ? 'border-green-500/30 bg-green-500/10' 
+                      : item.status === 'warning' 
+                        ? 'border-yellow-500/30 bg-yellow-500/10' 
+                        : 'border-red-500/30 bg-red-500/10'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    {item.status === 'compliant' ? (
+                      <Icons.check className="h-4 w-4 text-green-400" />
+                    ) : item.status === 'warning' ? (
+                      <Icons.alertTriangle className="h-4 w-4 text-yellow-400" />
+                    ) : (
+                      <Icons.x className="h-4 w-4 text-red-400" />
+                    )}
+                    <span>{item.text}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Proposal Builder - Full Width */}
+        <Card className="lg:col-span-2 border border-gray-800 bg-gray-900/50">
+          <CardHeader className="pb-3">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Icons.package className="mr-2 h-5 w-5 text-cyan-400" />
+              Proposal Builder
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <Button variant="outline" className="h-24 flex-col gap-2 bg-gray-800 hover:bg-gray-700">
+                <Icons.fileText className="h-6 w-6 text-cyan-400" />
+                <span>Technical Volume</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col gap-2 bg-gray-800 hover:bg-gray-700">
+                <Icons.grid className="h-6 w-6 text-cyan-400" />
+                <span>Compliance Matrix</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col gap-2 bg-gray-800 hover:bg-gray-700">
+                <Icons.redo className="h-6 w-6 text-cyan-400" />
+                <span>Redact Clauses</span>
+              </Button>
+              <Button variant="outline" className="h-24 flex-col gap-2 bg-gray-800 hover:bg-gray-700">
+                <Icons.download className="h-6 w-6 text-cyan-400" />
+                <span>Full Proposal Packet</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Strike Decision - Full Width */}
+        <Card className="lg:col-span-2 border border-gray-800 bg-gray-900/50">
+          <CardHeader className="pb-3">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Icons.target className="mr-2 h-5 w-5 text-red-400" />
+              STRIKE Decision Engine
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Icons.barChart className="h-5 w-5 text-green-400" />
+                  <h3 className="font-medium">Win Probability Analysis</h3>
+                </div>
+                <div className="text-4xl font-bold text-green-400">92%</div>
+                <Progress value={92} className="h-2 bg-gray-800" indicatorClassName="bg-green-500" />
+                <p className="text-sm text-gray-400">
+                  Based on 47 similar historical awards
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Icons.checkCircle className="h-5 w-5 text-green-400" />
+                  <h3 className="font-medium">Decision Status</h3>
+                </div>
+                <Badge className="px-4 py-2 text-lg bg-green-500/20 text-green-400 border-green-500">
+                  STRIKE AUTHORIZED
+                </Badge>
+                <p className="text-sm text-gray-400">
+                  All compliance thresholds met with 92% confidence
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Audit Log - Full Width */}
+        <Card className="lg:col-span-2 border border-gray-800 bg-gray-900/50">
+          <CardHeader className="pb-3">
+            <h2 className="text-lg font-semibold flex items-center">
+              <Icons.history className="mr-2 h-5 w-5 text-gray-400" />
+              Audit Log
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 h-2 w-2 mt-2 rounded-full bg-green-500"></div>
+                <div>
+                  <p className="font-medium">[09:02:47] Document Uploaded</p>
+                  <p className="text-sm text-gray-400">VA-SOW-1147.pdf (4.2 MB)</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 h-2 w-2 mt-2 rounded-full bg-blue-500"></div>
+                <div>
+                  <p className="font-medium">[09:03:12] Compliance Check Initiated</p>
+                  <p className="text-sm text-gray-400">DFARS 252.204-7012 scan started</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 h-2 w-2 mt-2 rounded-full bg-green-500"></div>
+                <div>
+                  <p className="font-medium">[09:04:33] Compliance Passed</p>
+                  <p className="text-sm text-gray-400">3/3 critical requirements met</p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
+                <div className="flex-shrink-0 h-2 w-2 mt-2 rounded-full bg-orange-500"></div>
+                <div>
+                  <p className="font-medium">[09:05:41] STRIKE Triggered</p>
+                  <p className="text-sm text-gray-400">Proposal generation authorized</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
+  );
+}
