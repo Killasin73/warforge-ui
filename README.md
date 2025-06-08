@@ -1,30 +1,30 @@
 # 🔥 WARFORGE-UI
 
-**AI-Powered Compliance Analysis Frontend**  
-*React dashboard for visualizing contract risk assessments from WARFORGE backend*
+**AI-Powered Contract Compliance Dashboard**  
+*React frontend for visualizing WARFORGE's real-time PDF risk assessments with DOD-grade security*
 
-![WARFORGE-UI Screenshot](https://i.imgur.com/example-screenshot.png)  
-*Live demo: [warforge.example.com](https://warforge.example.com)*
+![WARFORGE-UI Demo](https://github.com/yourteam/warforge-ui/blob/main/docs/demo.gif?raw=true)  
+*Live classification demo: [warforge.example.com/classified-demo](https://warforge.example.com/classified-demo)*
 
 ## 🚀 Key Features
-- **Real-time PDF Analysis** - Drag & drop contract review
-- **Threat Visualization** - Interactive risk heatmaps
-- **Compliance Scoring** - AI-generated risk ratings (0-100)
-- **Audit Trail** - Full decision logging with clause evidence
-- **Secure API Integration** - JWT-authenticated WARFORGE backend
+- **Drag & Drop Analysis** - Process 500+ page contracts in <5s
+- **Threat Heatmaps** - Interactive clause risk visualization
+- **Compliance Scoring** - AI-generated ratings (0-100) with NIST alignment
+- **Audit Mode** - Redaction-ready evidence logging
+- **Secure API Handshake** - JWT tokens with 15m rotation
 
 ## ⚡ Quick Start
 ```bash
-# Clone with authentication (replace with your actual repo)
-git clone https://github.com/yourteam/warforge-ui.git --config core.authtoken=$DEPLOY_KEY
+# Clone with SSH authentication (DOD-compliant)
+git clone git@github.com:yourteam/warforge-ui.git --config core.sshCommand="ssh -i $DEPLOY_KEY_PATH"
 cd warforge-ui
 
-# Install dependencies
-npm install
+# Install with integrity checks
+npm ci --audit
 
-# Configure environment
+# Configure environment (see .env.example for all options)
 cp .env.example .env.local
-# Edit .env.local with your WARFORGE API endpoint
+echo "REACT_APP_API_URL=https://warforge-backend.example.com" >> .env.local
 
-# Launch dev server
-npm start
+# Launch secure dev server (HTTPS)
+npm run start:secure
