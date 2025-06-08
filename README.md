@@ -1,33 +1,29 @@
 # 🔥 WARFORGE-UI
 
-**AI-Powered Contract Compliance Dashboard**  
-*React frontend for visualizing WARFORGE's real-time PDF risk assessments with DOD-grade security*
+**Tactical Contract Analysis Dashboard**  
+*React frontend for real-time PDF compliance assessment with DoD Zero-Trust architecture*
 
-![WARFORGE-UI Demo](https://github.com/yourteam/warforge-ui/blob/main/docs/classified-demo.gif?raw=true)  
-*Operational demo: [warforge.example.com/secure-demo](https://warforge.example.com/secure-demo) (CAC/PIV required)*
-
-## 🚀 Key Features
-- **Drag & Drop Analysis** - Process 500+ page contracts in <5s
-- **Threat Heatmaps** - Interactive clause risk visualization
-- **Compliance Scoring** - AI-generated ratings (0-100) with NIST SP 800-171 alignment
-- **Audit Mode** - Redaction-ready evidence logging with chain-of-custody
-- **Secure API Handshake** - JWT tokens with 15m rotation via PKI
+![Classified Demo](https://github.com/yourteam/warforge-ui/blob/main/docs/secure-demo.gif?raw=true)  
+*Operational demo: [warforge.example.com/secure-demo](https://warforge.example.com/secure-demo) (CAC/PIV + SIPRNet access required)*
 
 ## ⚡ Quick Start
 ```bash
-# Clone with SSH authentication (DOD-compliant)
+# Clone with military-grade authentication
 git clone git@github.com:yourteam/warforge-ui.git --config core.sshCommand="ssh -i $DEPLOY_KEY_PATH"
 cd warforge-ui
 
-# Install with integrity checks and vulnerability audit
+# Install with cryptographic integrity verification
 npm ci --audit
 
-# Configure environment
+# Configure operational environment
 cp .env.example .env.local
-echo "REACT_APP_API_URL=https://warforge-backend.example.com" >> .env.local
+echo "REACT_APP_API_URL=https://warforge-backend.smil.mil" >> .env.local
 
-# Generate TLS cert for dev (one-time)
-openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes
+# Generate FIPS 140-3 compliant TLS cert
+openssl req -x509 -newkey rsa:3072 -keyout key.pem -out cert.pem -days 30 -nodes -sha384
 
-# Launch dev server with TLS
+# Launch secure dev environment
 HTTPS=true SSL_CRT_FILE=cert.pem SSL_KEY_FILE=key.pem npm start
+
+# Build for hardened production
+npm run build
